@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date: 2018/03/01 15:12:12
+-- Create Date: 2018/03/01 15:04:28
 -- Design Name: 
--- Module Name: clk180kHz_tb - Behavioral
+-- Module Name: clk180KHz - Behavioral
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
@@ -31,46 +31,35 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity clk180kHz_tb is
+entity clk180KHz is
 --  Port ( );
-end clk180kHz_tb;
+    port(
+        clk_in : in std_logic;
+        reset : in std_logic;
+        clk_out : out std_logic
+    );
 
-architecture Behavioral of clk180kHz_tb is
-    component clk180kHz is
-        port(
-            clk_in : in std_logic;
-            reset : in std_logic;
-            clk_out : out std_logic
-        );
-     end component;
-     
-     signal clk_in : std_logic :='0';
-     signal reset : std_logic := '0';
-     
-     signal clk_out : std_logic :='0';
-     constant clk_in_t : time := 20ns;
+end clk180KHz;
+
+architecture Behavioral of clk180KHz is
+    signal temporal : std_logic;
+    signal counter : integer range 0 to 832 :=0;
 begin
-    u1 : clk180kHz port map(
-        clk_in => clk_in,
-        reset => reset,
-        clk_out => clk_out);
-    
-    entrada_process : process
+    frequency_divider : process (reset, clk_in) 
     begin
-        clk_in <= '0';
-        wait for clk_in_t /2;
-        
-        clk_in <= '1';
-        wait for clk_in_t /2;
-    end process;    
-    
-    Stimulus : process
-    begin
-        reset<='1';
-        wait for 100ns;
-        
-        reset<='0';
-        wait;    
-    
+        if(reset ='1') then
+            temporal <= '0';
+            counter <= 0;
+        elsif rising_edge(clk_in) then
+            if (counter = 832) then
+                temporal <= NOT(temporal);
+                counter <= 0;
+            else
+                counter <= counter +1;
+            end if;
+        end if;
     end process;
+    
+    clk_out <= temporal;
+    
 end Behavioral;
